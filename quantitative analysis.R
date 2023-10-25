@@ -29,28 +29,28 @@ top_threads <- readxl::read_xlsx("qualitative coding/subreddit_sample_top_thread
 left_threads <- top_threads %>% filter(subreddit %in% left_set)
 right_threads <- top_threads %>% filter(subreddit %in% right_set)
 
-coded_subs <- c("Anarchy101", "AskTrumpSupporters", "BlackLivesMatter", "BreadTube", "CoincidenceTheorist",
-                "Conservative", "DrainTheSwamp", "FragileWhiteRedditor", "kotakuinaction2", "LateStageCapitalism")
-
-for (sub in coded_subs){
-  obj = str_c(sub)
-  file = str_c("qualitative coding/code matrices/", sub, "_Code Matrix.xlsx")
-  data <- readxl::read_xlsx(file) 
-  if (grepl(" : ", data[,1])){
-  data <- data %>% separate(`...1`, c("nrow", "Entry"))  %>% select(-nrow)%>% 
-    arrange(as.numeric(Entry))
-  } else{
-    colnames(data)[1] <- "Entry"
-    data$Entry <- as.character(data$Entry)
-  }
-  for (i in 2:length(colnames(data))){
-    #print(i)
-    name = unlist(str_split(colnames(data)[i], " : "))[2]
-    paste(name)
-    colnames(data)[i] <- name
-  }
-  assign(obj, data)
-}
+# coded_subs <- c("Anarchy101", "AskTrumpSupporters", "BlackLivesMatter", "BreadTube", "CoincidenceTheorist",
+#                 "Conservative", "DrainTheSwamp", "FragileWhiteRedditor", "kotakuinaction2", "LateStageCapitalism")
+# 
+# for (sub in coded_subs){
+#   obj = str_c(sub)
+#   file = str_c("qualitative coding/code matrices/", sub, "_Code Matrix.xlsx")
+#   data <- readxl::read_xlsx(file) 
+#   if (grepl(" : ", data[,1])){
+#   data <- data %>% separate(`...1`, c("nrow", "Entry"))  %>% select(-nrow)%>% 
+#     arrange(as.numeric(Entry))
+#   } else{
+#     colnames(data)[1] <- "Entry"
+#     data$Entry <- as.character(data$Entry)
+#   }
+#   for (i in 2:length(colnames(data))){
+#     #print(i)
+#     name = unlist(str_split(colnames(data)[i], " : "))[2]
+#     paste(name)
+#     colnames(data)[i] <- name
+#   }
+#   assign(obj, data)
+# }
 
 mods <- readxl::read_xlsx("methods/sampling/mod_set.xlsx")
 
