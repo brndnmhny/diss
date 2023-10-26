@@ -117,43 +117,56 @@ left_posts <- posts %>% mutate(subreddit = substring(subreddit, 3)) %>% filter(s
 right_posts <- posts %>% mutate(subreddit = substring(subreddit, 3)) %>% filter(subreddit %in% right_set)
 posts = rbind(left_posts, right_posts)
 
-link_bases = c()
-link_bases_left = c()
-link_bases_right = c()
-for (p in 1:nrow(posts)){
-  #print(posts[p,])
-  i = posts[p,]$link
-  sub = posts[p,]$subreddit
-  #print(i)
-  #print(sub)
-  if (i != "None"){
-    split1 = str_split_i(i, ".com/|.it/|.be/|.org/|.net/|.gov/|.edu/|.cc/|.is/|.fm/|.uk/|.va/|.tw/|.ca/|.fr/|.news/|.co/|.moe/|.in/|.is/|.fo/|.ly/|.au/|.hk/|.us/|.il/|.tv/|.nyc/", 1)
-    split2 = str_split_i(split1, "https://|http://", 2)
-    #print(split2)
-    if (isTRUE(grepl("www.", split2, fixed = TRUE))){
-      split3 = str_split_i(split2, "www.", 2)
-      #print(split3)
-      link_bases <- c(link_bases, split3)
-      if (sub %in% left_set){
-        link_bases_left <- c(link_bases_left, split3)
-      }else{
-        link_bases_right <- c(link_bases_right, split3)
-      }
-    }  else{
-      #print(split2)
-      link_bases <- c(link_bases, split2)
-      if (sub %in% left_set){
-        link_bases_left <- c(link_bases_left, split2)
-      }else{
-        link_bases_right <- c(link_bases_right, split2)
-      }
-    }
-  }
-}
+# link_bases = c()
+# link_bases_left = c()
+# link_bases_right = c()
+# for (p in 1:nrow(posts)){
+#   #print(posts[p,])
+#   i = posts[p,]$link
+#   sub = posts[p,]$subreddit
+#   #print(i)
+#   #print(sub)
+#   if (i != "None"){
+#     split1 = str_split_i(i, ".com/|.it/|.be/|.org/|.net/|.gov/|.edu/|.cc/|.is/|.fm/|.uk/|.va/|.tw/|.ca/|.fr/|.news/|.co/|.moe/|.in/|.is/|.fo/|.ly/|.au/|.hk/|.us/|.il/|.tv/|.nyc/", 1)
+#     split2 = str_split_i(split1, "https://|http://", 2)
+#     #print(split2)
+#     if (isTRUE(grepl("www.", split2, fixed = TRUE))){
+#       split3 = str_split_i(split2, "www.", 2)
+#       #print(split3)
+#       link_bases <- c(link_bases, split3)
+#       if (sub %in% left_set){
+#         link_bases_left <- c(link_bases_left, split3)
+#       }else{
+#         link_bases_right <- c(link_bases_right, split3)
+#       }
+#     }  else{
+#       #print(split2)
+#       link_bases <- c(link_bases, split2)
+#       if (sub %in% left_set){
+#         link_bases_left <- c(link_bases_left, split2)
+#       }else{
+#         link_bases_right <- c(link_bases_right, split2)
+#       }
+#     }
+#   }
+# }
+# 
+# link_freq <- as.data.frame(table(link_bases)) %>% arrange(-Freq)
+# link_freq_left <- as.data.frame(table(link_bases_left)) %>% arrange(-Freq)
+# link_freq_right <- as.data.frame(table(link_bases_right)) %>% arrange(-Freq)
+# 
+# wb <- createWorkbook()
+# addWorksheet(wb, "links")
+# addWorksheet(wb, "left links")
+# addWorksheet(wb, "right links")
+# writeData(wb, "links", link_freq)
+# writeData(wb, "left links", link_freq_left)
+# writeData(wb, "right links", link_freq_right)
+# saveWorkbook(wb, file = "quantitative analysis/shared links.xlsx", overwrite = TRUE)
 
-link_freq <- as.data.frame(table(link_bases)) %>% arrange(-Freq)
-link_freq_left <- as.data.frame(table(link_bases_left)) %>% arrange(-Freq)
-link_freq_right <- as.data.frame(table(link_bases_right)) %>% arrange(-Freq)
+link_freq <- readxl::read_xlsx("quantitative analysis/shared links.xlsx", sheet = "links")
+link_freq_left <- readxl::read_xlsx("quantitative analysis/shared links.xlsx", sheet = "left links")
+link_freq_right <- readxl::read_xlsx("quantitative analysis/shared links.xlsx", sheet = "right links")
 
 
 #### Coding Analysis ####
@@ -463,15 +476,15 @@ left_graph <- graph_from_adjacency_matrix(left_matrix, mode = "undirected", weig
 left_graph <- igraph::simplify(left_graph, edge.attr.comb = list(weight = "sum")
                                )
 for (i in 1:115) {
-  if (i %in% c(1, 68, 76, 85, 106)) {
+  if (V(left_graph)[i]$name %in% c("LateStageCapitalism", "Anarchy101", "BreadTube",
+                                   "BlackLivesMatter", "FragileWhiteRedditor")) {
     left_graph <- set_vertex_attr(left_graph, "type", index = i, TRUE)
   } else {
     left_graph <- set_vertex_attr(left_graph, "type", index = i, FALSE)
   }
 }
-#left_graph <- delete_edges(left_graph, which(E(left_graph)$weight<=1))
-#left_graph <- delete_vertices(left_graph, degree(left_graph) == 1)
-left_graph_subs <- bipartite_projection(left_graph, types = V(left_graph)$type, which = "true")
+
+left_graph_subs <- bipartite_projection(left_graph, which = "true")
 ggraph(left_graph_subs, layout = "fr") + 
   geom_edge_link(aes(width = weight), edge_color = "grey50") + 
   geom_node_point(size = 10, shape = 21, fill = "orchid4") + 
@@ -485,13 +498,14 @@ right_graph <- graph_from_adjacency_matrix(right_matrix, mode = "undirected", we
 right_graph <- igraph::simplify(right_graph, edge.attr.comb = list(weight = "sum")
                                 )
 for (i in 1:119) {
-  if (i %in% c(1, 83, 88, 115, 119)) {
+  if (V(right_graph)[i]$name %in% c("Conservative", "AskTrumpSupporters", "kotakuinaction2",
+                                    "DrainTheSwamp", "CoincidenceTheorist")) {
     right_graph <- set_vertex_attr(right_graph, "type", index = i, TRUE)
   } else {
     right_graph <- set_vertex_attr(right_graph, "type", index = i, FALSE)
   }
 }
-#right_graph <- delete_vertices(right_graph, degree(right_graph) == 1)
+
 right_graph_subs <- bipartite_projection(right_graph, types = V(right_graph)$type, which = "true")
 ggraph(right_graph_subs, layout = "fr") + 
   geom_edge_link(aes(width = weight), edge_color = "grey50") + 
