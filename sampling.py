@@ -49,24 +49,6 @@ def save(file_location, posts):
                     file.write("\t")
             file.write("\n")
 
-def save_thread(file_location, posts):
-    with open (file_location, "w", encoding = "utf-8") as file:
-        for post in posts:
-            for p in post:
-                if type(p) == list:
-                    for puh in p:
-                        if type(puh) == list:
-                            for pu in puh:
-                                file.write(pu)
-                                file.write("\t")
-                        else:
-                            file.write(puh)
-                            file.write("\t")
-                else:
-                    file.write(p)
-                    file.write("\t")
-            file.write("\n")
-
 def correct_url(url):
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "http://" + url
